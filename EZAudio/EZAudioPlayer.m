@@ -337,12 +337,12 @@ NSString * const EZAudioPlayerDidSeekNotification = @"EZAudioPlayerDidSeekNotifi
     // stop playing anything that might currently be playing
     //
     [self pause];
-    
+
     //
     // set new stream
     //
     self.audioFile = audioFile;
-    
+
     //
     // begin playback
     //
@@ -379,13 +379,19 @@ NSString * const EZAudioPlayerDidSeekNotification = @"EZAudioPlayerDidSeekNotifi
 {
     if (self.audioFile)
     {
+        // TODO: Should try to fix this in a better way...
+        SInt64 leftFrames = self.audioFile.totalFrames - self.audioFile.frameIndex;
+        if (self.shouldLoop && leftFrames < frames) {
+            [self seekToFrame:0];
+        }
+
         UInt32 bufferSize;
         BOOL eof;
         [self.audioFile readFrames:frames
                    audioBufferList:audioBufferList
                         bufferSize:&bufferSize
                                eof:&eof];
-        if (eof && [self.delegate respondsToSelector:@selector(audioPlayer:reachedEndOfAudioFile:)]) 
+        if (eof && [self.delegate respondsToSelector:@selector(audioPlayer:reachedEndOfAudioFile:)])
         {
             [self.delegate audioPlayer:self reachedEndOfAudioFile:self.audioFile];
         }
